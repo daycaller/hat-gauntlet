@@ -5,7 +5,7 @@ export default async function handler(req) {
     return jsonResponse({ error: "method_not_allowed" }, 405);
   }
 
-  const url = new URL(req.url);
+  const url = new URL(req.url, "http://localhost");
   const name = sanitizeName(url.searchParams.get("name"));
   const holder = url.searchParams.get("holder") === "true";
 

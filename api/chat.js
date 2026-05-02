@@ -12,7 +12,8 @@ export default async function handler(req) {
 }
 
 async function handleGet(req) {
-  const url = new URL(req.url);
+  // Use a base URL fallback so this works on both Edge (absolute req.url) and Node.js (relative req.url) runtimes
+  const url = new URL(req.url, "http://localhost");
   const since = Number(url.searchParams.get("since")) || 0;
   const limit = Number(url.searchParams.get("limit")) || 50;
   const items = await kv.zrange(K.CHAT, 0, Math.min(limit, CHAT_HISTORY_SIZE) - 1, { rev: true });
