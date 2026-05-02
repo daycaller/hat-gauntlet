@@ -1,4 +1,4 @@
-import { kv } from "@vercel/kv";
+import { kv } from "../../lib/redis.js";
 import { K, CHAT_HISTORY_SIZE } from "../../lib/kv.js";
 import { verifyAdmin } from "../../lib/admin.js";
 export default async function handler(req) {
