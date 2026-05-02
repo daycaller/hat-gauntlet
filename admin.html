@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — The Hat Gauntlet</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=DM+Mono:wght@400;700&family=Archivo+Black&display=swap" rel="stylesheet">
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --pink: #ff7eb6;
+    --pink-deep: #e8538f;
+    --cream: #fff4e6;
+    --ink: #0f0f12;
+    --yolk: #ffd84d;
+    --green: #85e89d;
+    --red: #ff5470;
+  }
+  html, body { background: var(--cream); color: var(--ink); font-family: 'DM Mono', monospace; min-height: 100vh; }
+  body { padding-bottom: 60px; }
+  .display { font-family: 'Bagel Fat One', system-ui; }
+  .heavy { font-family: 'Archivo Black', sans-serif; }
+  button { font: inherit; cursor: pointer; border: none; background: none; }
+  input, textarea { font: inherit; }
+
+  .top {
+    background: var(--ink); color: var(--pink);
+    padding: 16px;
+    border-bottom: 4px solid var(--ink);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .top .display { font-size: 1.5rem; }
+  .top .right { display: flex; align-items: center; gap: 12px; font-size: 0.75rem; }
+  .top a { color: var(--pink); text-decoration: underline; }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 20px 16px; }
+
+  .login-card {
+    max-width: 420px; margin: 60px auto;
+    background: #fff;
+    border: 4px solid var(--ink); box-shadow: 8px 8px 0 var(--ink);
+    padding: 28px;
+  }
+  .login-card h1 { font-family: 'Bagel Fat One', system-ui; font-size: 2rem; margin-bottom: 6px; }
+  .login-card p { font-size: 0.85rem; opacity: 0.7; margin-bottom: 20px; }
+  .login-card label { display: block; font-weight: 700; font-size: 0.75rem; text-transform: uppercase; margin-bottom: 6px; }
+  .login-card input {
+    width: 100%; padding: 12px 14px;
+    border: 3px solid var(--ink);
+    background: #fff;
+    font-family: 'DM Mono', monospace; font-size: 1rem;
+    box-shadow: 4px 4px 0 var(--ink); outline: none;
+  }
+  .login-card input:focus { background: #fffbe7; }
+  .login-card button {
+    margin-top: 14px; width: 100%;
+    background: var(--pink); padding: 14px;
+    border: 3px solid var(--ink); box-shadow: 4px 4px 0 var(--ink);
+    font-family: 'Archivo Black', sans-serif; font-size: 1rem;
+  }
+  .login-card button:active { transform: translate(2px,2px); box-shadow: 2px 2px 0 var(--ink); }
+  .login-card .err {
+    background: var(--red); color: #fff; padding: 10px; margin-top: 12px;
+    font-weight: 700; font-size: 0.85rem; border: 2px solid var(--ink);
+  }
+
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 18px; }
+  .tab {
+    border: 3px solid var(--ink); background: #fff;
+    padding: 8px 14px;
+    font-family: 'Archivo Black', sans-serif; font-size: 0.8rem;
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+  .tab.active { background: var(--pink); }
+  .tab:active:not(.active) { transform: translate(2px,2px); box-shadow: 1px 1px 0 var(--ink); }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  .panel h2 {
+    font-family: 'Bagel Fat One', system-ui; font-size: 1.6rem;
+    margin-bottom: 4px;
+  }
+  .panel .subtitle { font-size: 0.8rem; opacity: 0.7; margin-bottom: 14px; }
+
+  .card {
+    background: #fff;
+    border: 3px solid var(--ink); box-shadow: 5px 5px 0 var(--ink);
+    padding: 14px 16px; margin-bottom: 10px;
+  }
+  .card.hidden-msg { background: #f0f0f0; opacity: 0.7; }
+
+  .msg-meta {
+    display: flex; gap: 10px; align-items: baseline;
+    font-size: 0.75rem; margin-bottom: 4px;
+  }
+  .msg-meta .name { font-weight: 700; }
+  .msg-meta .name.holder { background: var(--yolk); padding: 2px 6px; border: 2px solid var(--ink); display: inline-block; }
+  .msg-meta .time { opacity: 0.5; }
+  .msg-meta .id { opacity: 0.4; font-size: 0.7rem; }
+  .msg-text { font-size: 0.95rem; line-height: 1.4; word-break: break-word; }
+  .msg-actions { margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap; }
+  .btn {
+    border: 2px solid var(--ink); padding: 5px 10px;
+    font-family: 'Archivo Black', sans-serif; font-size: 0.7rem;
+    box-shadow: 2px 2px 0 var(--ink); background: #fff;
+  }
+  .btn:active { transform: translate(1px,1px); box-shadow: 1px 1px 0 var(--ink); }
+  .btn.warn { background: var(--yolk); }
+  .btn.danger { background: var(--red); color: #fff; }
+  .btn.success { background: var(--green); }
+
+  .ban-row { display: grid; grid-template-columns: 1fr auto auto; gap: 10px; align-items: center; padding: 10px 14px; background: #fff; border: 3px solid var(--ink); box-shadow: 4px 4px 0 var(--ink); margin-bottom: 8px; }
+  .ban-row .val { font-family: 'DM Mono', monospace; font-weight: 700; font-size: 0.9rem; word-break: break-all; }
+  .ban-row .type { font-size: 0.7rem; padding: 4px 8px; background: var(--ink); color: var(--cream); }
+  .ban-form {
+    display: grid; grid-template-columns: 1fr auto auto; gap: 8px; margin-bottom: 16px;
+  }
+  .ban-form input, .ban-form select {
+    padding: 10px 12px; border: 3px solid var(--ink);
+    box-shadow: 3px 3px 0 var(--ink); background: #fff;
+    font-family: 'DM Mono', monospace; font-weight: 700;
+  }
+  .ban-form button {
+    border: 3px solid var(--ink); background: var(--red); color: #fff;
+    padding: 10px 16px; font-family: 'Archivo Black', sans-serif; font-size: 0.85rem;
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+
+  .controls-grid { display: grid; gap: 14px; grid-template-columns: 1fr; }
+  @media (min-width: 700px) { .controls-grid { grid-template-columns: 1fr 1fr; } }
+  .control-card {
+    background: #fff;
+    border: 3px solid var(--ink); box-shadow: 5px 5px 0 var(--ink);
+    padding: 16px;
+  }
+  .control-card h3 { font-family: 'Archivo Black', sans-serif; font-size: 0.9rem; margin-bottom: 6px; }
+  .control-card p { font-size: 0.8rem; opacity: 0.7; margin-bottom: 12px; }
+  .control-card .row { display: flex; gap: 8px; align-items: center; }
+  .control-card input[type="number"] {
+    flex: 1; padding: 8px 10px; border: 3px solid var(--ink);
+    box-shadow: 3px 3px 0 var(--ink); font-family: 'DM Mono', monospace; font-weight: 700;
+    min-width: 0;
+  }
+
+  .empty { text-align: center; opacity: 0.5; padding: 30px; font-size: 0.9rem; }
+
+  .toast {
+    position: fixed; top: 70px; right: 20px;
+    background: var(--green); color: var(--ink);
+    padding: 12px 18px;
+    border: 3px solid var(--ink); box-shadow: 4px 4px 0 var(--ink);
+    font-family: 'Archivo Black', sans-serif; font-size: 0.85rem;
+    z-index: 1000;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    transform: translateX(120%);
+  }
+  .toast.show { transform: translateX(0); }
+  .toast.error { background: var(--red); color: #fff; }
+</style>
+</head>
+<body>
+
+<div class="top">
+  <span class="display">ADMIN</span>
+  <div class="right">
+    <a href="/">← back to game</a>
+    <button class="btn" id="logout-btn" style="display:none;">LOGOUT</button>
+  </div>
+</div>
+
+<div id="login-view">
+  <div class="login-card">
+    <h1>ADMIN PANEL</h1>
+    <p>Authorized moderators only.</p>
+    <label>PASSWORD</label>
+    <input type="password" id="login-password" placeholder="enter admin password" autocomplete="current-password">
+    <button id="login-btn">LOG IN</button>
+    <div class="err" id="login-err" style="display:none;"></div>
+  </div>
+</div>
+
+<div id="admin-view" style="display:none;">
+  <div class="container">
+    <div class="tabs">
+      <button class="tab active" data-tab="messages">MESSAGES</button>
+      <button class="tab" data-tab="bans">BANS</button>
+      <button class="tab" data-tab="controls">GAME CONTROLS</button>
+      <button class="tab" data-tab="burn">BURN POOL</button>
+    </div>
+
+    <div class="panel active" id="panel-messages">
+      <h2>RECENT MESSAGES</h2>
+      <p class="subtitle">Last 100 messages, including hidden ones (greyed out).</p>
+      <div id="msg-list">
+        <div class="empty">Loading…</div>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-bans">
+      <h2>BANS</h2>
+      <p class="subtitle">Banned names cannot post or tap. Banned IPs same. To find an IP, check Vercel function logs.</p>
+
+      <div class="ban-form">
+        <input type="text" id="ban-value" placeholder="name or IP to ban" autocomplete="off">
+        <select id="ban-type">
+          <option value="name">Name</option>
+          <option value="ip">IP</option>
+        </select>
+        <button id="ban-add-btn">BAN</button>
+      </div>
+
+      <h3 style="margin-top:20px; margin-bottom:8px; font-family:'Archivo Black',sans-serif; font-size:0.85rem;">CURRENT BANS</h3>
+      <div id="bans-list">
+        <div class="empty">Loading…</div>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-controls">
+      <h2>EMERGENCY GAME CONTROLS</h2>
+      <p class="subtitle">Use sparingly. These bypass game rules and are visible in event log.</p>
+
+      <div class="controls-grid">
+        <div class="control-card">
+          <h3>SET METER</h3>
+          <p>Manually set the hat stability meter (0–100).</p>
+          <div class="row">
+            <input type="number" id="meter-value" min="0" max="100" value="50">
+            <button class="btn warn" id="meter-set-btn">SET</button>
+          </div>
+        </div>
+
+        <div class="control-card">
+          <h3>RESET GAME STATE</h3>
+          <p>Resets meter to 50%, clears streak, keeps history.</p>
+          <button class="btn warn" id="reset-state-btn">RESET STATE</button>
+        </div>
+
+        <div class="control-card">
+          <h3>CLEAR LEADERBOARDS</h3>
+          <p>Wipes today's, all-time, and streak boards. Cannot be undone.</p>
+          <button class="btn danger" id="clear-lb-btn">CLEAR LEADERBOARDS</button>
+        </div>
+
+        <div class="control-card">
+          <h3>CLEAR CHAT</h3>
+          <p>Deletes all chat messages. Cannot be undone.</p>
+          <button class="btn danger" id="clear-chat-btn">CLEAR CHAT</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-burn">
+      <h2>🔥 BURN POOL</h2>
+      <p class="subtitle">Execute a burn when the pool reaches the threshold. The vault private key MUST be set as the VAULT_PRIVATE_KEY env var on Vercel for this to work.</p>
+
+      <div class="control-card" id="burn-summary">
+        <div class="row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div>
+            <h3>POOL</h3>
+            <div style="font-family:'Bagel Fat One',system-ui; font-size:2rem; line-height:1;" id="burn-pool-val">—</div>
+            <div style="font-size:0.75rem; opacity:0.6; margin-top:2px;">/ <span id="burn-threshold-val">10,000</span> $WIF2</div>
+          </div>
+          <div>
+            <h3>TOTAL BURNED</h3>
+            <div style="font-family:'Bagel Fat One',system-ui; font-size:2rem; line-height:1;" id="burn-total-val">—</div>
+            <div style="font-size:0.75rem; opacity:0.6; margin-top:2px;" id="burn-last-text">—</div>
+          </div>
+        </div>
+        <div style="margin-top:16px; padding-top:14px; border-top:2px solid rgba(15,15,18,0.1);">
+          <div style="font-size:0.75rem; opacity:0.7; margin-bottom:8px;" id="burn-vault-status">Vault status: checking…</div>
+          <button class="btn danger" id="burn-execute-btn" style="font-size:1rem; padding:14px 22px;" disabled>BELOW THRESHOLD</button>
+          <div style="font-size:0.7rem; opacity:0.7; margin-top:8px;">
+            Tip: you can also execute a burn before reaching the threshold by entering a custom amount below.
+          </div>
+        </div>
+      </div>
+
+      <div class="control-card" style="margin-top:14px;">
+        <h3>CUSTOM BURN</h3>
+        <p>Burn a specific amount (e.g. for special events or partial burns). Skips the 10k threshold check.</p>
+        <div class="row">
+          <input type="number" id="burn-custom-amount" min="0" step="100" placeholder="amount in $WIF2">
+          <button class="btn warn" id="burn-custom-btn">BURN CUSTOM AMOUNT</button>
+        </div>
+      </div>
+
+      <h3 style="margin-top:24px; margin-bottom:8px; font-family:'Archivo Black',sans-serif; font-size:0.85rem;">RECENT BURNS</h3>
+      <div id="burn-history">
+        <div class="empty">Loading…</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function() {
+  var TOKEN_KEY = "hg:admin:token";
+  var token = localStorage.getItem(TOKEN_KEY) || null;
+  var currentTab = "messages";
+
+  // =====================================================
+  // ELEMENTS
+  // =====================================================
+  var loginView = document.getElementById("login-view");
+  var adminView = document.getElementById("admin-view");
+  var loginPassword = document.getElementById("login-password");
+  var loginBtn = document.getElementById("login-btn");
+  var loginErr = document.getElementById("login-err");
+  var logoutBtn = document.getElementById("logout-btn");
+  var msgList = document.getElementById("msg-list");
+  var bansList = document.getElementById("bans-list");
+  var toastEl = document.getElementById("toast");
+
+  // =====================================================
+  // INIT
+  // =====================================================
+  if (token) {
+    showAdmin();
+  } else {
+    showLogin();
+  }
+
+  function showLogin() {
+    loginView.style.display = "block";
+    adminView.style.display = "none";
+    logoutBtn.style.display = "none";
+    setTimeout(function() { loginPassword.focus(); }, 50);
+  }
+  function showAdmin() {
+    loginView.style.display = "none";
+    adminView.style.display = "block";
+    logoutBtn.style.display = "inline-block";
+    refreshMessages();
+    refreshBans();
+  }
+
+  // =====================================================
+  // LOGIN
+  // =====================================================
+  loginBtn.addEventListener("click", login);
+  loginPassword.addEventListener("keydown", function(e) {
+    if (e.key === "Enter") login();
+  });
+
+  function login() {
+    var pw = loginPassword.value;
+    if (!pw) return;
+    loginErr.style.display = "none";
+    loginBtn.disabled = true;
+    fetch("/api/admin/auth", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password: pw })
+    })
+      .then(function(r) { return r.json().then(function(d) { return { status: r.status, data: d }; }); })
+      .then(function(res) {
+        loginBtn.disabled = false;
+        if (res.status >= 400) {
+          loginErr.textContent = res.data.error === "wrong_password" ? "Wrong password" : (res.data.error || "login failed");
+          loginErr.style.display = "block";
+          return;
+        }
+        token = res.data.token;
+        localStorage.setItem(TOKEN_KEY, token);
+        loginPassword.value = "";
+        showAdmin();
+      })
+      .catch(function() {
+        loginBtn.disabled = false;
+        loginErr.textContent = "network error";
+        loginErr.style.display = "block";
+      });
+  }
+
+  logoutBtn.addEventListener("click", function() {
+    token = null;
+    localStorage.removeItem(TOKEN_KEY);
+    showLogin();
+  });
+
+  function authedFetch(url, opts) {
+    opts = opts || {};
+    opts.headers = Object.assign({}, opts.headers || {}, {
+      "Authorization": "Bearer " + token
+    });
+    return fetch(url, opts).then(function(r) {
+      if (r.status === 401) {
+        token = null;
+        localStorage.removeItem(TOKEN_KEY);
+        showLogin();
+        throw new Error("unauthorized");
+      }
+      return r;
+    });
+  }
+
+  // =====================================================
+  // TABS
+  // =====================================================
+  Array.from(document.querySelectorAll(".tab")).forEach(function(t) {
+    t.addEventListener("click", function() {
+      document.querySelectorAll(".tab").forEach(function(x) { x.classList.remove("active"); });
+      document.querySelectorAll(".panel").forEach(function(x) { x.classList.remove("active"); });
+      t.classList.add("active");
+      currentTab = t.dataset.tab;
+      document.getElementById("panel-" + currentTab).classList.add("active");
+      if (currentTab === "messages") refreshMessages();
+      if (currentTab === "bans") refreshBans();
+      if (currentTab === "burn") refreshBurn();
+    });
+  });
+
+  // =====================================================
+  // MESSAGES PANEL
+  // =====================================================
+  function refreshMessages() {
+    msgList.innerHTML = '<div class="empty">Loading…</div>';
+    authedFetch("/api/admin/messages")
+      .then(function(r) { return r.json(); })
+      .then(function(data) { renderMessages(data.messages || []); })
+      .catch(function() {
+        msgList.innerHTML = '<div class="empty">Failed to load</div>';
+      });
+  }
+
+  function renderMessages(messages) {
+    if (!messages.length) {
+      msgList.innerHTML = '<div class="empty">No messages yet.</div>';
+      return;
+    }
+    msgList.innerHTML = messages.map(function(m) {
+      var time = new Date(m.ts).toLocaleString();
+      var hiddenClass = m.hidden ? " hidden-msg" : "";
+      var nameClass = m.holder ? "name holder" : "name";
+      var hideAction = m.hidden
+        ? '<button class="btn success" data-action="unhide" data-id="' + escapeAttr(m.id) + '">UNHIDE</button>'
+        : '<button class="btn warn" data-action="hide" data-id="' + escapeAttr(m.id) + '">HIDE</button>';
+      return '<div class="card' + hiddenClass + '">' +
+        '<div class="msg-meta">' +
+          '<span class="' + nameClass + '">' + escapeHtml(m.name || "anon") + (m.holder ? " ✓" : "") + '</span>' +
+          '<span class="time">' + escapeHtml(time) + '</span>' +
+          '<span class="id">' + escapeHtml(m.id) + '</span>' +
+        '</div>' +
+        '<div class="msg-text">' + escapeHtml(m.text || "") + '</div>' +
+        '<div class="msg-actions">' +
+          hideAction +
+          '<button class="btn danger" data-action="delete" data-id="' + escapeAttr(m.id) + '">DELETE</button>' +
+          '<button class="btn" data-action="ban-name" data-name="' + escapeAttr(m.name || "") + '">BAN NAME</button>' +
+        '</div>' +
+        '</div>';
+    }).join("");
+
+    // Wire up action buttons
+    Array.from(msgList.querySelectorAll("button[data-action]")).forEach(function(b) {
+      b.addEventListener("click", function() {
+        var action = b.dataset.action;
+        if (action === "ban-name") {
+          var name = b.dataset.name;
+          if (!name) return;
+          if (!confirm('Ban "' + name + '" from chat and game?')) return;
+          banAction("name", name, "ban");
+          return;
+        }
+        var id = b.dataset.id;
+        msgAction(id, action);
+      });
+    });
+  }
+
+  function msgAction(id, action) {
+    if (action === "delete" && !confirm("Permanently delete this message?")) return;
+    authedFetch("/api/admin/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: id, action: action })
+    })
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        if (d.error) { showToast(d.error, true); return; }
+        showToast(action + "d");
+        refreshMessages();
+      })
+      .catch(function() { showToast("failed", true); });
+  }
+
+  // =====================================================
+  // BANS PANEL
+  // =====================================================
+  document.getElementById("ban-add-btn").addEventListener("click", function() {
+    var value = document.getElementById("ban-value").value.trim();
+    var type = document.getElementById("ban-type").value;
+    if (!value) return;
+    banAction(type, value, "ban").then(function() {
+      document.getElementById("ban-value").value = "";
+    });
+  });
+
+  function banAction(type, value, action) {
+    return authedFetch("/api/admin/ban", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: type, value: value, action: action })
+    })
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        if (d.error) { showToast(d.error, true); return; }
+        showToast(action + "ned " + type + ": " + value);
+        refreshBans();
+      })
+      .catch(function() { showToast("failed", true); });
+  }
+
+  function refreshBans() {
+    bansList.innerHTML = '<div class="empty">Loading…</div>';
+    authedFetch("/api/admin/ban")
+      .then(function(r) { return r.json(); })
+      .then(function(data) { renderBans(data); })
+      .catch(function() {
+        bansList.innerHTML = '<div class="empty">Failed to load</div>';
+      });
+  }
+
+  function renderBans(data) {
+    var rows = [];
+    (data.names || []).forEach(function(n) {
+      rows.push({ type: "name", value: n });
+    });
+    (data.ips || []).forEach(function(ip) {
+      rows.push({ type: "ip", value: ip });
+    });
+    if (!rows.length) {
+      bansList.innerHTML = '<div class="empty">No bans yet.</div>';
+      return;
+    }
+    bansList.innerHTML = rows.map(function(r) {
+      return '<div class="ban-row">' +
+        '<div class="val">' + escapeHtml(r.value) + '</div>' +
+        '<div class="type">' + r.type.toUpperCase() + '</div>' +
+        '<button class="btn success" data-type="' + escapeAttr(r.type) + '" data-value="' + escapeAttr(r.value) + '">UNBAN</button>' +
+        '</div>';
+    }).join("");
+    Array.from(bansList.querySelectorAll("button")).forEach(function(b) {
+      b.addEventListener("click", function() {
+        banAction(b.dataset.type, b.dataset.value, "unban");
+      });
+    });
+  }
+
+  // =====================================================
+  // GAME CONTROLS
+  // =====================================================
+  document.getElementById("meter-set-btn").addEventListener("click", function() {
+    var v = Number(document.getElementById("meter-value").value);
+    if (isNaN(v)) return;
+    controlAction("set_meter", v);
+  });
+  document.getElementById("reset-state-btn").addEventListener("click", function() {
+    if (!confirm("Reset hat meter to 50% and clear streak?")) return;
+    controlAction("reset_state");
+  });
+  document.getElementById("clear-lb-btn").addEventListener("click", function() {
+    if (!confirm("WIPE all leaderboards permanently? Cannot be undone.")) return;
+    controlAction("clear_lb");
+  });
+  document.getElementById("clear-chat-btn").addEventListener("click", function() {
+    if (!confirm("DELETE all chat messages permanently? Cannot be undone.")) return;
+    controlAction("clear_chat");
+  });
+
+  function controlAction(action, value) {
+    var body = { action: action };
+    if (value !== undefined) body.value = value;
+    authedFetch("/api/admin/reset", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    })
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        if (d.error) { showToast(d.error, true); return; }
+        showToast("done: " + action);
+      })
+      .catch(function() { showToast("failed", true); });
+  }
+
+  // =====================================================
+  // BURN POOL PANEL
+  // =====================================================
+  var burnExecuteBtn = document.getElementById("burn-execute-btn");
+  var burnCustomBtn = document.getElementById("burn-custom-btn");
+  var burnCustomAmount = document.getElementById("burn-custom-amount");
+
+  burnExecuteBtn.addEventListener("click", function() {
+    if (!confirm("EXECUTE BURN: send the entire pool to the burn address? This is permanent and on-chain.")) return;
+    executeBurnTx(null);
+  });
+
+  burnCustomBtn.addEventListener("click", function() {
+    var amt = Number(burnCustomAmount.value);
+    if (!amt || amt <= 0) { showToast("enter an amount > 0", true); return; }
+    if (!confirm("BURN " + amt + " $WIF2 from the vault? This is permanent and on-chain.")) return;
+    executeBurnTx(amt);
+  });
+
+  function executeBurnTx(amount) {
+    burnExecuteBtn.disabled = true;
+    burnCustomBtn.disabled = true;
+    showToast("burning… (signing tx)");
+    var body = amount !== null ? { amount: amount } : {};
+    authedFetch("/api/admin/burn", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    })
+      .then(function(r) { return r.json().then(function(d) { return { status: r.status, data: d }; }); })
+      .then(function(res) {
+        if (res.status >= 400) {
+          showToast("BURN FAILED: " + (res.data.error || "unknown"), true);
+          console.error("[burn]", res.data);
+        } else {
+          var sig = res.data.burn && res.data.burn.txSig ? res.data.burn.txSig.slice(0, 12) + "..." : "?";
+          showToast("🔥 BURN EXECUTED — tx " + sig);
+          burnCustomAmount.value = "";
+        }
+        refreshBurn();
+      })
+      .catch(function(e) { showToast("network error", true); console.error(e); })
+      .finally(function() {
+        burnExecuteBtn.disabled = false;
+        burnCustomBtn.disabled = false;
+      });
+  }
+
+  function refreshBurn() {
+    fetch("/api/burns")
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var pool = Number(data.pool) || 0;
+        var threshold = Number(data.threshold) || 10000;
+        var total = Number(data.totalBurned) || 0;
+        var lastTs = data.lastBurnTs;
+        var burns = Array.isArray(data.burns) ? data.burns : [];
+
+        document.getElementById("burn-pool-val").textContent = formatTokens(pool);
+        document.getElementById("burn-threshold-val").textContent = formatTokens(threshold);
+        document.getElementById("burn-total-val").textContent = formatTokens(total);
+        document.getElementById("burn-last-text").textContent = lastTs
+          ? "Last: " + new Date(lastTs).toLocaleString()
+          : "No burns yet";
+
+        var statusEl = document.getElementById("burn-vault-status");
+        if (!data.vaultConfigured) {
+          statusEl.innerHTML = '<strong style="color:#ff5470;">⚠ VAULT_PRIVATE_KEY env var not set</strong> — burns will fail until you add it in Vercel project settings.';
+          burnExecuteBtn.disabled = true;
+          burnExecuteBtn.textContent = "VAULT NOT CONFIGURED";
+          burnCustomBtn.disabled = true;
+        } else {
+          statusEl.innerHTML = '<span style="color:#1f8a3a;">✓ Vault configured</span>';
+          burnCustomBtn.disabled = false;
+          if (pool >= threshold) {
+            burnExecuteBtn.disabled = false;
+            burnExecuteBtn.textContent = "🔥 EXECUTE BURN OF " + formatTokens(pool) + " $WIF2";
+          } else {
+            burnExecuteBtn.disabled = true;
+            burnExecuteBtn.textContent = "BELOW THRESHOLD (" + formatTokens(threshold - pool) + " to go)";
+          }
+        }
+
+        var historyEl = document.getElementById("burn-history");
+        if (!burns.length) {
+          historyEl.innerHTML = '<div class="empty">No burns yet.</div>';
+        } else {
+          historyEl.innerHTML = burns.slice(0, 10).map(function(b) {
+            var sigShort = (b.txSig || "").slice(0, 8) + "…" + (b.txSig || "").slice(-6);
+            return '<div class="card" style="display:flex; justify-content:space-between; align-items:center;">' +
+              '<div>' +
+                '<div style="font-family:Bagel Fat One,system-ui; font-size:1.4rem; color:#ff5470;">' + formatTokens(b.amount) + ' $WIF2</div>' +
+                '<div style="font-size:0.7rem; opacity:0.7; margin-top:2px;">' + new Date(b.burnedAt).toLocaleString() + '</div>' +
+              '</div>' +
+              '<a target="_blank" rel="noreferrer" href="https://solscan.io/tx/' + escapeAttr(b.txSig || "") + '" style="font-family:Archivo Black,sans-serif; font-size:0.7rem; padding:6px 10px; border:2px solid #0f0f12; box-shadow:2px 2px 0 #0f0f12; background:#ffd84d; text-decoration:none; color:#0f0f12;">' +
+                escapeHtml(sigShort) + ' ↗' +
+              '</a>' +
+            '</div>';
+          }).join("");
+        }
+      })
+      .catch(function() {
+        document.getElementById("burn-history").innerHTML = '<div class="empty">Failed to load</div>';
+      });
+  }
+
+  function formatTokens(n) {
+    n = Number(n) || 0;
+    if (n >= 1e6) return (n / 1e6).toFixed(2) + "M";
+    if (n >= 1e3) return (n / 1e3).toFixed(2) + "K";
+    if (n >= 100) return Math.round(n).toLocaleString();
+    if (n >= 1) return n.toFixed(1);
+    return n.toFixed(2);
+  }
+
+  // =====================================================
+  // TOAST
+  // =====================================================
+  function showToast(text, isError) {
+    toastEl.textContent = text;
+    toastEl.classList.toggle("error", !!isError);
+    toastEl.classList.add("show");
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(function() {
+      toastEl.classList.remove("show");
+    }, 2500);
+  }
+
+  // =====================================================
+  // UTILS
+  // =====================================================
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function(c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function escapeAttr(s) {
+    return escapeHtml(s);
+  }
+})();
+</script>
+</body>
+</html>

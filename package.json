@@ -1,0 +1,16 @@
+{
+  "name": "hat-gauntlet",
+  "version": "1.1.0",
+  "description": "The Hat Gauntlet — collaborative defend-the-hat game for the $WIF2 community",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "22.x"
+  },
+  "dependencies": {
+    "@vercel/kv": "^3.0.0",
+    "@solana/web3.js": "^1.95.0",
+    "@solana/spl-token": "^0.4.8",
+    "bs58": "^6.0.0"
+  }
+}

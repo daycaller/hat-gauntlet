@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Burns — The Hat Gauntlet</title>
+<meta name="description" content="$WIF2 burn vault — every tap fuels the burn. Full transparency: every burn transaction logged on Solana.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=DM+Mono:wght@400;700&family=Archivo+Black&display=swap" rel="stylesheet">
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --pink: #ff7eb6;
+    --pink-deep: #e8538f;
+    --pink-soft: #ffd5e5;
+    --cream: #fff4e6;
+    --ink: #0f0f12;
+    --yolk: #ffd84d;
+    --green: #85e89d;
+    --red: #ff5470;
+  }
+  html, body { background: var(--cream); color: var(--ink); font-family: 'DM Mono', monospace; min-height: 100vh; }
+  body { padding-bottom: 60px; }
+  .display { font-family: 'Bagel Fat One', system-ui; }
+  .heavy { font-family: 'Archivo Black', sans-serif; }
+  button, a { font: inherit; cursor: pointer; }
+  a { color: inherit; }
+
+  .top-bar {
+    background: var(--ink); color: var(--pink);
+    padding: 14px 16px;
+    text-align: center;
+    border-bottom: 4px solid var(--ink);
+  }
+  .top-bar .display { font-size: clamp(1.4rem, 5vw, 2rem); }
+  .top-bar .nav { margin-top: 8px; display: flex; justify-content: center; gap: 16px; }
+  .top-bar .nav a {
+    color: var(--pink); text-decoration: none;
+    border: 2px solid var(--pink); padding: 4px 12px;
+    font-family: 'Archivo Black', sans-serif; font-size: 0.7rem;
+    letter-spacing: 0.05em;
+  }
+  .top-bar .nav a:hover { background: var(--pink); color: var(--ink); }
+
+  .container { max-width: 880px; margin: 0 auto; padding: 24px 16px; }
+
+  /* HERO POOL CARD */
+  .hero-pool {
+    background: var(--pink);
+    border: 4px solid var(--ink); box-shadow: 8px 8px 0 var(--ink);
+    padding: 28px 22px;
+    margin-bottom: 24px;
+    transform: rotate(-0.4deg);
+  }
+  .hero-pool .label {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 0.85rem; letter-spacing: 0.1em;
+    margin-bottom: 6px; opacity: 0.85;
+  }
+  .hero-pool .num {
+    font-family: 'Bagel Fat One', system-ui;
+    font-size: clamp(2.5rem, 9vw, 4.25rem);
+    line-height: 0.95;
+    color: var(--ink);
+    word-break: break-all;
+  }
+  .hero-pool .num .ticker { font-size: 0.45em; opacity: 0.7; margin-left: 4px; }
+  .hero-pool .sub {
+    font-family: 'DM Mono', monospace; font-size: 0.85rem; font-weight: 700;
+    margin-top: 10px; opacity: 0.85;
+  }
+
+  /* POOL PROGRESS */
+  .pool-card {
+    background: #fff;
+    border: 4px solid var(--ink); box-shadow: 6px 6px 0 var(--ink);
+    padding: 22px;
+    margin-bottom: 24px;
+  }
+  .pool-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 10px;
+  }
+  .pool-row .lbl { font-family: 'Archivo Black', sans-serif; font-size: 0.85rem; letter-spacing: 0.05em; }
+  .pool-row .val {
+    font-family: 'Bagel Fat One', system-ui;
+    font-size: 1.5rem;
+  }
+  .pool-row .val .sep { opacity: 0.4; margin: 0 4px; }
+  .pool-progress-wrap {
+    border: 3px solid var(--ink);
+    background: var(--cream);
+    height: 38px;
+    overflow: hidden;
+    box-shadow: 4px 4px 0 var(--ink);
+    position: relative;
+  }
+  .pool-progress-bar {
+    height: 100%;
+    background: var(--ink);
+    transition: width 0.6s ease;
+  }
+  .pool-progress-bar.ready {
+    background: var(--red);
+    animation: pool-pulse 1.2s ease-in-out infinite;
+  }
+  @keyframes pool-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.65; } }
+  .pool-progress-pct {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Bagel Fat One', system-ui;
+    font-size: 1.2rem;
+    color: var(--ink);
+    text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff;
+  }
+
+  /* VAULT INFO */
+  .info-card {
+    background: #fff;
+    border: 3px solid var(--ink); box-shadow: 5px 5px 0 var(--ink);
+    padding: 18px;
+    margin-bottom: 18px;
+  }
+  .info-card h3 {
+    font-family: 'Bagel Fat One', system-ui;
+    font-size: 1.25rem;
+    margin-bottom: 10px;
+  }
+  .info-row {
+    display: grid;
+    grid-template-columns: 130px 1fr;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(15,15,18,0.08);
+    font-size: 0.85rem;
+  }
+  .info-row:last-child { border-bottom: none; }
+  .info-row .k {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    align-self: center;
+    opacity: 0.7;
+  }
+  .info-row .v {
+    font-family: 'DM Mono', monospace;
+    font-weight: 700;
+    word-break: break-all;
+  }
+  .info-row .v a {
+    color: var(--pink-deep);
+    text-decoration: underline;
+  }
+  .info-row .v a:hover { color: var(--ink); }
+
+  /* BURNS HISTORY */
+  h2.section {
+    font-family: 'Bagel Fat One', system-ui;
+    font-size: 1.5rem;
+    margin: 24px 0 14px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  h2.section .count {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    opacity: 0.5;
+    font-weight: 700;
+  }
+  .burns-list .empty {
+    text-align: center;
+    padding: 30px;
+    font-size: 0.9rem;
+    opacity: 0.6;
+    border: 3px dashed rgba(15,15,18,0.2);
+  }
+  .burn-row {
+    background: #fff;
+    border: 3px solid var(--ink); box-shadow: 4px 4px 0 var(--ink);
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    align-items: center;
+  }
+  .burn-row .meta {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    opacity: 0.7;
+    margin-top: 4px;
+  }
+  .burn-row .amount {
+    font-family: 'Bagel Fat One', system-ui;
+    font-size: 1.4rem;
+    color: var(--red);
+  }
+  .burn-row .amount .ticker {
+    font-size: 0.65em;
+    opacity: 0.6;
+    margin-left: 4px;
+  }
+  .burn-row .right { text-align: right; }
+  .burn-row .tx-link {
+    display: inline-block;
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 0.65rem;
+    color: var(--ink);
+    text-decoration: none;
+    border: 2px solid var(--ink);
+    background: var(--yolk);
+    padding: 4px 8px;
+    margin-top: 6px;
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+  .burn-row .tx-link:hover { background: var(--pink); }
+
+  /* EXPLAINER */
+  .explainer {
+    background: var(--pink-soft);
+    border: 3px solid var(--ink); box-shadow: 5px 5px 0 var(--ink);
+    padding: 18px;
+    margin: 24px 0;
+    font-size: 0.9rem;
+    line-height: 1.55;
+  }
+  .explainer h3 {
+    font-family: 'Bagel Fat One', system-ui;
+    font-size: 1.2rem; margin-bottom: 10px;
+  }
+  .explainer ul { padding-left: 1.2em; }
+  .explainer li { margin-bottom: 6px; }
+  .explainer code {
+    background: rgba(15,15,18,0.08); padding: 2px 5px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+  }
+  .disclaimer {
+    background: var(--yolk);
+    border: 3px solid var(--ink); box-shadow: 4px 4px 0 var(--ink);
+    padding: 14px 16px;
+    margin-top: 18px;
+    font-size: 0.8rem;
+    line-height: 1.5;
+  }
+  .disclaimer strong { font-family: 'Archivo Black', sans-serif; }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="display">🔥 BURNS</div>
+  <div class="nav">
+    <a href="/">GAME</a>
+    <a href="/badges">BADGES</a>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="hero-pool">
+    <div class="label">TOTAL $WIF2 BURNED</div>
+    <div class="num"><span id="total-burned">—</span><span class="ticker">$WIF2</span></div>
+    <div class="sub" id="last-burn-text">No burns yet.</div>
+  </div>
+
+  <div class="pool-card">
+    <div class="pool-row">
+      <div class="lbl">CURRENT BURN POOL</div>
+      <div class="val">
+        <span id="pool-current">—</span>
+        <span class="sep">/</span>
+        <span id="pool-threshold">10,000</span>
+      </div>
+    </div>
+    <div class="pool-progress-wrap">
+      <div class="pool-progress-bar" id="pool-bar" style="width: 0%;"></div>
+      <div class="pool-progress-pct" id="pool-pct">—%</div>
+    </div>
+    <div style="margin-top: 12px; font-size: 0.8rem; opacity: 0.7; text-align: center;" id="pool-status">
+      Loading pool…
+    </div>
+  </div>
+
+  <div class="info-card">
+    <h3>VAULT INFO</h3>
+    <div class="info-row">
+      <div class="k">VAULT</div>
+      <div class="v" id="vault-address-row">—</div>
+    </div>
+    <div class="info-row">
+      <div class="k">BURN ADDRESS</div>
+      <div class="v">
+        <a id="burn-address-link" href="#" target="_blank" rel="noreferrer">—</a>
+      </div>
+    </div>
+    <div class="info-row">
+      <div class="k">TOKEN ($WIF2)</div>
+      <div class="v">
+        <a href="https://solscan.io/token/9tCjcZFwaqMFSFkiYDRAGd3kxChxVguHDCREb6eSpump" target="_blank" rel="noreferrer">
+          9tCjcZFwaqMFSFkiYDRAGd3kxChxVguHDCREb6eSpump
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="explainer">
+    <h3>HOW IT WORKS</h3>
+    <ul>
+      <li>The community vault is a wallet pre-funded with $WIF2 tokens. <strong>You can contribute by sending $WIF2 to the vault address above.</strong></li>
+      <li>Every tap in the game adds to the burn pool: <code>0.020 $WIF2</code> per anonymous tap, <code>0.080 $WIF2</code> per holder tap (4× boost).</li>
+      <li>When the pool reaches <strong>10,000 $WIF2</strong>, an admin executes the burn — tokens are sent from the vault to Solana's official burn address. The transaction is published below for everyone to verify on Solscan.</li>
+      <li>The pool resets to zero after each burn, then starts filling again.</li>
+    </ul>
+  </div>
+
+  <h2 class="section">RECENT BURNS <span class="count" id="burns-count"></span></h2>
+  <div class="burns-list" id="burns-list">
+    <div class="empty">Loading burn history…</div>
+  </div>
+
+  <div class="disclaimer">
+    <strong>TRUST NOTICE:</strong> The vault is a community-custodied wallet. Anyone with access to the vault's private key can move tokens. The team is custodian of these funds and commits to using them only for game burns. Every burn is a public, on-chain transaction — verify each one on Solscan via the links above.
+  </div>
+
+</div>
+
+<script>
+(function() {
+  var BURN_ADDRESS = "1nc1nerator11111111111111111111111111111111";
+  var SOLSCAN_TX = "https://solscan.io/tx/";
+  var SOLSCAN_ACCT = "https://solscan.io/account/";
+
+  var totalBurnedEl = document.getElementById("total-burned");
+  var lastBurnTextEl = document.getElementById("last-burn-text");
+  var poolCurrentEl = document.getElementById("pool-current");
+  var poolThresholdEl = document.getElementById("pool-threshold");
+  var poolBarEl = document.getElementById("pool-bar");
+  var poolPctEl = document.getElementById("pool-pct");
+  var poolStatusEl = document.getElementById("pool-status");
+  var vaultAddressRow = document.getElementById("vault-address-row");
+  var burnAddressLink = document.getElementById("burn-address-link");
+  var burnsListEl = document.getElementById("burns-list");
+  var burnsCountEl = document.getElementById("burns-count");
+
+  // Set static burn address link
+  burnAddressLink.textContent = BURN_ADDRESS;
+  burnAddressLink.href = SOLSCAN_ACCT + BURN_ADDRESS;
+
+  fetchBurns();
+  setInterval(fetchBurns, 5000);  // refresh every 5s
+
+  function fetchBurns() {
+    fetch("/api/burns")
+      .then(function(r) { return r.json(); })
+      .then(function(data) { render(data); })
+      .catch(function() {
+        burnsListEl.innerHTML = '<div class="empty">Failed to load burn data.</div>';
+      });
+  }
+
+  function render(data) {
+    if (!data) return;
+    var pool = Number(data.pool) || 0;
+    var threshold = Number(data.threshold) || 10000;
+    var totalBurned = Number(data.totalBurned) || 0;
+    var burns = Array.isArray(data.burns) ? data.burns : [];
+    var pct = Math.min(100, (pool / threshold) * 100);
+    var isReady = pool >= threshold;
+
+    totalBurnedEl.textContent = formatTokens(totalBurned);
+    if (data.lastBurnTs) {
+      lastBurnTextEl.textContent = "Last burn: " + relTime(data.lastBurnTs);
+    } else {
+      lastBurnTextEl.textContent = "No burns yet — be the first.";
+    }
+
+    poolCurrentEl.textContent = formatTokens(pool);
+    poolThresholdEl.textContent = formatTokens(threshold);
+    poolBarEl.style.width = pct + "%";
+    poolBarEl.classList.toggle("ready", isReady);
+    poolPctEl.textContent = pct.toFixed(1) + "%";
+
+    if (isReady) {
+      poolStatusEl.textContent = "🔥 POOL FULL — A BURN IS QUEUED";
+    } else {
+      var remaining = Math.max(0, threshold - pool);
+      poolStatusEl.textContent = formatTokens(remaining) + " $WIF2 to next burn";
+    }
+
+    // Vault address — only shown if env var is set
+    if (data.vaultAddress) {
+      vaultAddressRow.innerHTML = '<a href="' + SOLSCAN_ACCT + escapeAttr(data.vaultAddress) + '" target="_blank" rel="noreferrer">' + escapeHtml(data.vaultAddress) + '</a>';
+    } else if (data.vaultConfigured) {
+      vaultAddressRow.innerHTML = '<span style="opacity:0.6;">configured (set VAULT_PUBLIC_ADDRESS env var to display)</span>';
+    } else {
+      vaultAddressRow.innerHTML = '<span style="opacity:0.6;">not configured yet</span>';
+    }
+
+    // Burn history
+    burnsCountEl.textContent = burns.length ? "(" + burns.length + ")" : "";
+    if (!burns.length) {
+      burnsListEl.innerHTML = '<div class="empty">No burns executed yet. Tap to fill the pool.</div>';
+    } else {
+      burnsListEl.innerHTML = burns.map(function(b) {
+        var sigShort = (b.txSig || "").slice(0, 8) + "…" + (b.txSig || "").slice(-6);
+        return '<div class="burn-row">' +
+          '<div>' +
+            '<div class="amount">' + formatTokens(b.amount || 0) + ' <span class="ticker">$WIF2</span></div>' +
+            '<div class="meta">' + relTime(b.burnedAt) + ' • ' + new Date(b.burnedAt).toLocaleString() + '</div>' +
+          '</div>' +
+          '<div class="right">' +
+            '<a class="tx-link" href="' + SOLSCAN_TX + escapeAttr(b.txSig || "") + '" target="_blank" rel="noreferrer">' +
+              escapeHtml(sigShort) + ' ↗' +
+            '</a>' +
+          '</div>' +
+        '</div>';
+      }).join("");
+    }
+  }
+
+  function formatTokens(n) {
+    n = Number(n) || 0;
+    if (n >= 1e9) return (n / 1e9).toFixed(2) + "B";
+    if (n >= 1e6) return (n / 1e6).toFixed(2) + "M";
+    if (n >= 1e3) return (n / 1e3).toFixed(2) + "K";
+    if (n >= 100) return Math.round(n).toLocaleString();
+    if (n >= 1) return n.toFixed(1);
+    return n.toFixed(2);
+  }
+
+  function relTime(ts) {
+    var diff = Date.now() - ts;
+    var s = Math.floor(diff / 1000);
+    if (s < 60) return s + "s ago";
+    var m = Math.floor(s / 60);
+    if (m < 60) return m + "m ago";
+    var h = Math.floor(m / 60);
+    if (h < 24) return h + "h ago";
+    return Math.floor(h/24) + "d ago";
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function(c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function escapeAttr(s) { return escapeHtml(s); }
+})();
+</script>
+</body>
+</html>
