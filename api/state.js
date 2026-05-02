@@ -8,19 +8,25 @@ export default async function handler(req) {
   }
 
   try {
+    console.log("[state] handler start");
     let state = await kv.get(K.STATE);
+    console.log("[state] got state:", state ? "exists" : "null");
     if (!state) state = defaultState();
 
     const now = Date.now();
     state = applyDrain(state, now);
+    console.log("[state] applied drain");
     await rollHazard(state, now);
+    console.log("[state] rolled hazard");
 
     await kv.set(K.STATE, state);
+    console.log("[state] saved state");
 
     // Top 10 leaderboards
     const lbDayRaw = await kv.zrange(K.LB_DAY, 0, 9, { rev: true, withScores: true });
     const lbAllRaw = await kv.zrange(K.LB_ALL, 0, 9, { rev: true, withScores: true });
     const lbStreakRaw = await kv.zrange(K.LB_STREAK, 0, 9, { rev: true, withScores: true });
+    console.log("[state] got leaderboards");
 
     const lbDay = parseLeaderboard(lbDayRaw);
     const lbAll = parseLeaderboard(lbAllRaw);
