@@ -1,4 +1,4 @@
-import { kv } from "@vercel/kv";
+import { kv } from "../lib/redis.js";
 import { K, defaultState, applyDrain, rollHazard, getRecentEvents } from "../lib/kv.js";
 import { awardDailyTop3IfDue } from "../lib/badges.js";
 import { getBurnState } from "../lib/burn.js";

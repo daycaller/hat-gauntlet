@@ -1,4 +1,4 @@
-import { kv } from "@vercel/kv";
+import { kv } from "../lib/redis.js";
 import {
   K, defaultState, applyDrain, rollHazard,
   TAP_BASE_AMT, TAP_HOLDER_AMT, TAP_COOLDOWN_MS,

@@ -1,4 +1,4 @@
-import { kv } from "@vercel/kv";
+import { kv } from "../lib/redis.js";
 import { BURN_KEYS, BURN_THRESHOLD, SOLANA_BURN_ADDRESS, hasVaultKey } from "../lib/burn.js";
 export default async function handler(req) {
   if (req.method !== "GET") {

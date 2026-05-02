@@ -1,4 +1,4 @@
-import { kv } from "@vercel/kv";
+import { kv } from "../lib/redis.js";
 import {
   K, sanitizeName, sanitizeMessage,
   CHAT_RATE_LIMIT_MS, CHAT_HISTORY_SIZE,
